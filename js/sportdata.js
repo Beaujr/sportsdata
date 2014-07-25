@@ -12,7 +12,7 @@ function setColours(){
 function init(id,team){
   myTeam = team;
   id = id;
-  $.getJSON( "PHP/centreAPI.php?service=score&id="+id, function( data ) {
+  $.getJSON( "PHP/API.php?service=score&id="+id, function( data ) {
     score_by_games = data['Score'];
     teams=data['Teams'];
     myTeam = (myTeam == undefined) ? teams[0] : myTeam;
@@ -39,7 +39,7 @@ function init(id,team){
           var list_teams_id = 'list-teams'; //second select list ID
          
           <?php  
-    include("centreAPI.php");
+    include("SportDataAPI.php");
     loadCentreData(29);
     $league = loadLeagues(29);
     echo 'var initial_target_html = \'"';
@@ -67,7 +67,7 @@ function init(id,team){
                $('#'+list_division_id).html(initial_target_html);
             } else {
               //Make AJAX request, using the selected value as the GET
-              $.ajax({url: 'centreAPI.php?service=league&id='+$('#list-centre').val(),
+              $.ajax({url: 'SportDataAPI.php?service=league&id='+$('#list-centre').val(),
                      success: function(output) {
                         //alert(output);
                         $('#'+list_division_id).html(output);
@@ -97,7 +97,7 @@ function init(id,team){
                $('#'+list_teams_id).html(initial_target_html);
             } else {
               //Make AJAX request, using the selected value as the GET
-              $.ajax({url: 'centreAPI.php?service=division&id='+$('#list-leagues').val(),
+              $.ajax({url: 'SportDataAPI.php?service=division&id='+$('#list-leagues').val(),
                      success: function(output) {
                         //alert(output);
                         $('#'+list_teams_id).html(output);
