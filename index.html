@@ -1,620 +1,278 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<script type="text/javascript" src="//code.jquery.com/jquery-1.9.1.js"></script>
-<script src="http://code.highcharts.com/stock/highstock.js"></script>
-<script src="http://code.highcharts.com/modules/exporting.js"></script>
-<script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SPORTSDATA Statistics</title>
+    <title>(Beau)tifying Sports Data</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="icon" href="http://sportdata.com.au/images/soccer.ico" />
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-    body {
-	  padding-top: 20px;
-	  padding-bottom: 20px;
-	}
+    <!-- Custom CSS -->
+    <link href="css/stylish-portfolio.css" rel="stylesheet">
 
-	.navbar {
-	  margin-bottom: 20px;
-	}
-    </style>
+    <!-- Custom Fonts -->
+    <link href="font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
 
-    <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-    <script>
-	<?php 
-       //load up the API
-       include("centreAPI.php");
-       //declare the league $id variable
-       $id;
-        //get my TEAM from GET Variable TODO: change to being set via modal
-        echo "var myTeam =unescape('".$_GET['team']."');\n\n";
-        echo "var teams= [];\n\n";
-       //if its numeric then its an ID
-       if(is_numeric($_GET["id"])){
-            $id = $_GET['id'];
-            //load the divisions data
-           loadDivisionData($id);
-           //echo the past games scores to a json array
-            echo "var score_by_games = JSON.parse('".json_encode(pastScores_By_Game())."');\n\n";
-            //load all the teams into a JS array
-            echo "var teams = JSON.parse('".json_encode(loadTeams())."');\n\n";
 
-       //TODO: change to first division in the league
-       } else {
-           // $id = '1655';
-       }
-       
-
-?>
-//If your team is blank, you are the jimmy rustlers!
-//TODO: set to first team in the division
-var teamColours= [];
-function setColours(){
-    for(i = 0; i < teams.length; i++){
-        var randomColour='#'+Math.floor(Math.random()*16777215).toString(16);
-        while(randomColour.length < 7){
-            randomColour='#'+Math.floor(Math.random()*16777215).toString(16);
-        }
-        teamColours[teams[i]] = randomColour;
-        
-    }
-}
-function init(){
-$('.navbar li').click(function(e) {
-    $('.navbar li.active').removeClass('active');
-    var $this = $(this);
-    if (!$this.hasClass('active')) {
-        $this.addClass('active');
-    }
-    e.preventDefault();
-});
-      if(myTeam == ''){
-          $('#mymodal').modal('show');
-          var list_league_id = 'list-centre'; //first select list ID
-          var list_division_id = 'list-leagues'; //second select list ID
-          var list_teams_id = 'list-teams'; //second select list ID
-         
-          <?php  
-            
-              loadCentreData(29);
-              $league = loadLeagues();
-              echo 'var initial_target_html = \'"';
-              echo '<option value="">Please select a league...</option>'; 
-              for ($i = 0; $i < count($league); $i++){
-                echo '<option value="'.$league[$i]['id'].'">'.$league[$i]['league'].'</option>';
-              }
-              echo '"\';';
-
-          ?>//Initial prompt for target select
-         
-          $('#'+list_league_id).html(initial_target_html); //Give the target select the prompt option
-         
-          $('#'+list_league_id).change(function(e) {
-            //Grab the chosen value on first select list change
-            var selectvalue = $(this).val();
-         
-            //Display 'loading' status in the target select list
-            $('#'+list_division_id).html('<option value="">Loading...</option>');
-         
-            if (selectvalue == "") {
-                //Display initial prompt in target select if blank value selected
-               $('#'+list_division_id).html(initial_target_html);
-            } else {
-              //Make AJAX request, using the selected value as the GET
-              $.ajax({url: 'centreAPI.php?service=league&id='+$('#list-centre').val(),
-                     success: function(output) {
-                        //alert(output);
-                        $('#'+list_division_id).html(output);
-                        daySelect = document.getElementById(list_division_id);
-                        var data = JSON.parse(output);
-                        daySelect.options[daySelect.options.length] = new Option("Please Select", "");
-                        for (i = 0; i < data.length; i++){
-                            daySelect.options[daySelect.options.length] = new Option(data[i]['division'], data[i]['id']);
-                        }
-                        
-                    },
-                  error: function (xhr, ajaxOptions, thrownError) {
-                    alert(xhr.status + " "+ thrownError);
-                  }});
-                }
-            });
-          $('#'+list_division_id).change(function(e) {
-            //Grab the chosen value on first select list change
-
-             var selectvalue = $(this).val();
-         
-            //Display 'loading' status in the target select list
-            $('#'+list_teams_id).html('<option value="">Loading...</option>');
-         
-            if (selectvalue == "") {
-                //Display initial prompt in target select if blank value selected
-               $('#'+list_teams_id).html(initial_target_html);
-            } else {
-              //Make AJAX request, using the selected value as the GET
-              $.ajax({url: 'centreAPI.php?service=division&id='+$('#list-leagues').val(),
-                     success: function(output) {
-                        //alert(output);
-                        $('#'+list_teams_id).html(output);
-                        daySelect = document.getElementById(list_teams_id);
-                        var data = JSON.parse(output);
-                        daySelect.options[daySelect.options.length] = new Option("Please Select", "");
-                        for (i = 0; i < data.length; i++){
-                            daySelect.options[daySelect.options.length] = new Option(data[i], data[i]);
-                        }
-                        
-                    },
-                  error: function (xhr, ajaxOptions, thrownError) {
-                    alert(xhr.status + " "+ thrownError);
-                  }});
-                }
-            });
-             $('#'+list_teams_id).change(function(e) {
-            window.location.search += "&id="+$('#list-leagues').val()+"&team="+$(this).val();
-             });
-    }
-    setColours();
-    plotWinsIncremental();
-}
-//Empty the graphs data
-function cleanRemoveAllSeries(){
-    while($('#graphs').highcharts().series.length > 0)
-        $('#graphs').highcharts().series[0].remove(true);
-    	
-}
-/**
- * Plots a running total week by week of the goals scored by the team
- * 
- */
-
-function plotGoalsIncrement(){
-   var teamArray = {};
-   var dataArray = [];
-   var teamCounter = 0;
-   //For all the games played so far
-    for(i = 0; i < score_by_games.length;i++){
-        //For all the data in the match
-    	for(x = 0; x<score_by_games[i].length; x++){ 
-    		//Team A 
-    		var teamA = score_by_games[i][x]["Team A"];
-    		//TEAM B
-            var teamB = score_by_games[i][x]["Team B"];
-    		//Add Team A to the Team Array
-            if(teamArray[teamA] == undefined){
-                teamArray[teamA] = teamCounter;
-                dataArray.push({name: teamA, data: [], visible: (myTeam==teamA) ? true: false, color: teamColours[teamA]})
-                teamCounter++;
-    		} 
-            //ADD Team B to the Team Array
-    		if(teamArray[teamB] == undefined){
-    			teamArray[teamB] = teamCounter;
-    			dataArray.push({name: teamB, data: [], visible: (myTeam==teamB) ? true: false, color: teamColours[teamB]})
-    			teamCounter++;
-    		}
-            //If the team already has a goal recorded 
-			if (dataArray[teamArray[teamA]].data.length > 0){
-                //Get the total from the last game
-				var teamRunningTotal = dataArray[teamArray[teamA]].data[dataArray[teamArray[teamA]].data.length-1][1];
-				//Add it to this matchs score
-                teamRunningTotal+=parseInt(score_by_games[i][x]["A"]);
-                //Store the new total for this week
-				dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), parseInt(teamRunningTotal)]);
-			} else {
-                //We are at Game 1 so store the Teams goal score
-				dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), parseInt(score_by_games[i][x]["A"])]);
-			}
-            //SAME as above for Team B instead of team A
-			if(dataArray[teamArray[teamB]].data.length > 0){
-				var teamRunningTotal = dataArray[teamArray[teamB]].data[dataArray[teamArray[teamB]].data.length-1][1];
-				teamRunningTotal += parseInt(score_by_games[i][x]["B"]);
-				dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), parseInt(teamRunningTotal)]);
-			} else{
-				dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), parseInt(score_by_games[i][x]["B"])]);
-			}
-		
-    	}
-    }
-
-    //Clean out the data in the graph
-    cleanRemoveAllSeries();
-    for(i = 0; i < dataArray.length; i++){
-        $('#graphs').highcharts().addSeries(dataArray[i]);
-    }
-    //Set the graphs Title
-    $('#graphs').highcharts().setTitle({text: "Running total of Goals Scored By Week"});
-    //Redraw the graph with the new data
-    $('#graphs').highcharts().redraw();
-}
-function plotGoalsPerWeek(){
-   var teamArray = {};
-   var dataArray = [];
-   var teamCounter = 0;
-    for(i = 0; i < score_by_games.length;i++){
-    	for(x = 0; x<score_by_games[i].length; x++){ 
-    		
-    		var teamA = score_by_games[i][x]["Team A"];
-    		var teamB = score_by_games[i][x]["Team B"];
-    		if(teamArray[teamA] == undefined){
-    			teamArray[teamA] = teamCounter;
-    			dataArray.push({name: teamA, data: [], visible: (myTeam==teamA) ? true: false, color: teamColours[teamA]})
-    			teamCounter++;
-    		} 
-
-    		if(teamArray[teamB] == undefined){
-    			teamArray[teamB] = teamCounter;
-    			dataArray.push({name: teamB, data: [], visible: (myTeam==teamB) ? true: false, color: teamColours[teamB]})
-    			teamCounter++;
-    		}
-
-			dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), parseInt(score_by_games[i][x]["A"])]);
-			dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), parseInt(score_by_games[i][x]["B"])]);
-			
-		
-    	}
-    }
-
-    //return dataArray;
-    cleanRemoveAllSeries();
-    for(i = 0; i < dataArray.length; i++){
-        $('#graphs').highcharts().addSeries(dataArray[i]);
-    }
-    $('#graphs').highcharts().setTitle({text: "Goals Scored Each Game"});
-
-    $('#graphs').highcharts().redraw();
-}
-
-function plotWinLossMargins(){
-   var teamArray = {};
-   var dataArray = [];
-   var teamCounter = 0;
-    for(i = 0; i < score_by_games.length;i++){
-    	for(x = 0; x<score_by_games[i].length; x++){ 
-    		
-    		var teamA = score_by_games[i][x]["Team A"];
-    		var teamB = score_by_games[i][x]["Team B"];
-    		if(teamArray[teamA] == undefined){
-    			teamArray[teamA] = teamCounter;
-    			dataArray.push({name: teamA, data: [], visible: (myTeam==teamA) ? true: false, color: teamColours[teamA]})
-    			teamCounter++;
-    		} 
-
-    		if(teamArray[teamB] == undefined){
-    			teamArray[teamB] = teamCounter;
-    			dataArray.push({name: teamB, data: [], visible: (myTeam==teamB) ? true: false, color: teamColours[teamB]})
-    			teamCounter++;
-    		}
-			var teamAScore = parseInt(score_by_games[i][x]["A"]);
-			var teamBScore = parseInt(score_by_games[i][x]["B"]);
-			if(teamAScore > teamBScore){
-				teamAScore = teamAScore - teamBScore;
-				teamBScore = teamAScore * -1;
-			} else if (teamAScore < teamBScore){
-				teamBScore = teamBScore - teamAScore;
-				teamAScore = teamBScore  * -1;
-			} else {
-				teamAScore = 0;
-				teamBScore = 0;
-			}		
-			dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamAScore]);
-			dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamBScore]);
-			
-		
-    	}
-    }
-
-    //return dataArray;
-    cleanRemoveAllSeries();
-    for(i = 0; i < dataArray.length; i++){
-        $('#graphs').highcharts().addSeries(dataArray[i]);
-    }
-    $('#graphs').highcharts().setTitle({text: "Weekly Win / Loss Margin"});
-
-    $('#graphs').highcharts().redraw();
-}
-
-function plotGoalsMarginsIncremental(){
-   var teamArray = {};
-   var dataArray = [];
-   var teamCounter = 0;
-
-   var teamRunningTotalA=0;
-   var teamRunningTotalB=0;
-
-    for(i = 0; i < score_by_games.length;i++){
-    	for(x = 0; x<score_by_games[i].length; x++){ 
-    		
-    		var teamA = score_by_games[i][x]["Team A"];
-    		var teamB = score_by_games[i][x]["Team B"];
-
-			if(teamArray[teamA] == undefined){
-    			teamArray[teamA] = teamCounter;
-    			dataArray.push({name: teamA, data: [], visible: (myTeam==teamA) ? true: false, color: teamColours[teamA]})
-    			teamCounter++;
-    		} 
-
-    		if(teamArray[teamB] == undefined){
-    			teamArray[teamB] = teamCounter;
-    			dataArray.push({name: teamB, data: [], visible: (myTeam==teamB) ? true: false, color: teamColours[teamB]})
-    			teamCounter++;
-    		}
-    		
-
-				var teamAScore = parseInt(score_by_games[i][x]["A"]);
-				var teamBScore = parseInt(score_by_games[i][x]["B"]);
-				if(teamAScore > teamBScore){
-					teamAScore = teamAScore - teamBScore;
-					teamBScore = teamAScore * -1;
-				} else if (teamAScore < teamBScore){
-					teamBScore = teamBScore - teamAScore;
-					teamAScore = teamBScore  * -1;
-				} else {
-					teamAScore = 0;
-					teamBScore = 0;
-				}
-
-				if (dataArray[teamArray[teamA]].data.length > 0){
-					teamRunningTotalA = dataArray[teamArray[teamA]].data[dataArray[teamArray[teamA]].data.length-1][1];			
-				} 
-				if (dataArray[teamArray[teamB]].data.length > 0){
-					teamRunningTotalB = dataArray[teamArray[teamB]].data[dataArray[teamArray[teamB]].data.length-1][1];
-				} 
-				
-					dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamAScore+teamRunningTotalA]);
-					
-				
-					dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamBScore+teamRunningTotalB]);
-
-			
-		
-    	}
-    }
-
-    //return dataArray;
-    cleanRemoveAllSeries();
-    for(i = 0; i < dataArray.length; i++){
-        $('#graphs').highcharts().addSeries(dataArray[i]);
-    }
-    $('#graphs').highcharts().setTitle({text: "Running Weekly Total of (Goals Scored - Goals Against)"});
-
-    $('#graphs').highcharts().redraw();
-}
-
-function plotWinsLosses(){
-	//$('.nav a:contains("pWinsLossPw")').tab('show');
-   var teamArray = {};
-   var dataArray = [];
-   var teamCounter = 0;
-    for(i = 0; i < score_by_games.length;i++){
-    	for(x = 0; x<score_by_games[i].length; x++){ 
-    		
-    		var teamA = score_by_games[i][x]["Team A"];
-    		var teamB = score_by_games[i][x]["Team B"];
-    		if(teamArray[teamA] == undefined){
-    			teamArray[teamA] = teamCounter;
-    			dataArray.push({name: teamA, data: [], visible: (myTeam==teamA) ? true: false, color: teamColours[teamA]})
-    			teamCounter++;
-    		} 
-
-    		if(teamArray[teamB] == undefined){
-    			teamArray[teamB] = teamCounter;
-    			dataArray.push({name: teamB, data: [], visible: (myTeam==teamB) ? true: false, color: teamColours[teamB]})
-    			teamCounter++;
-    		}
-    		if(parseInt(score_by_games[i][x]["A"]) > parseInt(score_by_games[i][x]["B"])){
-				dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 1]);
-				dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 0]);
-    		} else if (parseInt(score_by_games[i][x]["A"]) < parseInt(score_by_games[i][x]["B"])){
-				dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 0]);
-				dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 1]);
-    		} else {//DRAW
-				dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 0.5]);
-				dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 0.5]);
-    		}
-			
-		
-    	}
-    }
-
-    //return dataArray;
-    cleanRemoveAllSeries();
-    cleanRemoveAllSeries();
-    for(i = 0; i < dataArray.length; i++){
-        $('#graphs').highcharts().addSeries(dataArray[i]);
-    }
-    
-    
- 	$('#graphs').highcharts().setTitle({text: "Wins vs Losses per Week"});
-    $('#graphs').highcharts().redraw();
-}
-function plotCompareTwoTeams(CompareA, CompareB){
-   var teamArray = {};
-   var dataArray = [];
-   var teamCounter = 0;
-    for(i = 0; i < score_by_games.length;i++){
-    	for(x = 0; x<score_by_games[i].length; x++){ 
-    		
-    		var teamA = score_by_games[i][x]["Team A"];
-    		var teamB = score_by_games[i][x]["Team B"];
-
-    		if((teamA == CompareA || teamA == CompareB) && (teamB == CompareA || teamB == CompareB)){
-	    		if(teamArray[teamA] == undefined){
-	    			teamArray[teamA] = teamCounter;
-	    			dataArray.push({name: teamA, data: [], color: teamColours[teamA]});
-	    			teamCounter++;
-	    		} 
-
-	    		if(teamArray[teamB] == undefined){
-	    			teamArray[teamB] = teamCounter;
-	    			dataArray.push({name: teamB, data: [], color: teamColours[teamB]});
-	    			teamCounter++;
-	    		}
-
-	    		if(parseInt(score_by_games[i][x]["A"]) > parseInt(score_by_games[i][x]["B"])){
-					dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 1]);
-					dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 0]);
-	    		} else if (parseInt(score_by_games[i][x]["A"]) < parseInt(score_by_games[i][x]["B"])){
-					dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 0]);
-					dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 1]);
-	    		} else {//DRAW
-					dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 0.5]);
-					dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), 0.5]);
-	    		}
-	    	}
-			
-		
-    	}
-    }
-
-    //return dataArray;
-    cleanRemoveAllSeries();
-    for(i = 0; i < dataArray.length; i++){
-        $('#graphs').highcharts().addSeries(dataArray[i]);
-    }
- 	$('#graphs').highcharts().setTitle({text: "Match History: "+CompareA+" vs "+CompareB});
-    $('#graphs').highcharts().redraw();
-}
-function plotWinsIncremental(){
-   var teamArray = {};
-       //Clean out the data in the graph
-   //cleanRemoveAllSeries();
-   var dataArray = [];
-   var teamCounter = 0;
-		//Get Initial Totals
-	var teamRunningTotalA = 0;
-	var teamRunningTotalB = 0;
-    for(i = 0; i < score_by_games.length;i++){
-    	for(x = 0; x<score_by_games[i].length; x++){ 
-    		
-    		var teamA = score_by_games[i][x]["Team A"];
-    		var teamB = score_by_games[i][x]["Team B"];
-    		if(teamArray[teamA] == undefined){
-    			teamArray[teamA] = teamCounter;
-    			dataArray.push({name: teamA, data: [], color: teamColours[teamA]})
-    			teamCounter++;
-    		}  
-
-    		if(teamArray[teamB] == undefined){
-    			teamArray[teamB] = teamCounter;
-    			dataArray.push({name: teamB, data: [], color: teamColours[teamB]})
-    			teamCounter++;
-    		}
-
-    		if (dataArray[teamArray[teamA]].data.length > 0){
-				teamRunningTotalA = dataArray[teamArray[teamA]].data[dataArray[teamArray[teamA]].data.length-1][1];			
-			} 
-			if (dataArray[teamArray[teamB]].data.length > 0){
-				teamRunningTotalB = dataArray[teamArray[teamB]].data[dataArray[teamArray[teamB]].data.length-1][1];
-			} 
-
-    		if(parseInt(score_by_games[i][x]["A"]) > parseInt(score_by_games[i][x]["B"])){
-				dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamRunningTotalA+1]);
-				dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamRunningTotalB]);
-    		} else if (parseInt(score_by_games[i][x]["A"]) < parseInt(score_by_games[i][x]["B"])){
-				dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamRunningTotalB+1]);
-				dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamRunningTotalA]);
-    		} else {//DRAW
-				dataArray[teamArray[teamA]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamRunningTotalA+0.5]);
-				dataArray[teamArray[teamB]].data.push([Date.parse(score_by_games[i]['Date']+' UTC',"yyyy/MM/dd HH:mm:ss"), teamRunningTotalB+0.5]);
-    		}
-			
-		
-    	}
-    }
-
-    cleanRemoveAllSeries();
-    for(i = 0; i < dataArray.length; i++){
-        $('#graphs').highcharts().addSeries(dataArray[i]);
-
-    }
-    $('#graphs').highcharts().setTitle({text: "LeaderBoard by Week"});
-	$('#graphs').highcharts().redraw();
-}
-    </script>
 </head>
-<body  onload="init()">
-<div id="container">
-	<div class="navbar navbar-default" role="navigation">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">Analytics</a>
-          </div>
-          <div class="navbar-collapse collapse" ng-contollrt="HeaderController">
-            <ul class="nav navbar-nav">
-              <li class="active"><a  href="#active" onClick="plotWinsIncremental()" data-toggle="tab">Score Board</a></li>
-              <li><a href="#WinsLossPw" onClick="plotWinsLosses()" data-toggle="tab">Plot Wins/Losses</a></li>
-              <li><a href="/#WinsLossMarginPw" onClick="plotWinLossMargins()" data-toggle="tab">Plot Wins/Loss Margin</a></li>
-              <li><a href="#goalsInc" onClick="plotGoalsIncrement();" data-toggle="tab">Goals Incremental</a></li>
-              <li><a href="#GoalsMarginInc" onClick="plotGoalsMarginsIncremental()" data-toggle="tab">Goals Margins Incremental</a></li>
-              <li><a href="#goalsPw" onClick="plotGoalsPerWeek()" data-toggle="tab">Goals Per Week</a></li>
-              <li><a href="#matchupHistory" onClick="plotCompareTwoTeams('Jimmie Rustlers','The Kunners')" data-toggle="tab">Compare Teams</a></li>
+
+<body>
+
+    <!-- Navigation -->
+    <a id="menu-toggle" href="#" class="btn btn-dark btn-lg toggle"><i class="fa fa-bars"></i></a>
+    <nav id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <a id="menu-close" href="#" class="btn btn-light btn-lg pull-right toggle"><i class="fa fa-times"></i></a>
+            <li class="sidebar-brand">
+                <a href="#top">Beau Rudder</a>
+            </li>
+            <li>
+                <a href="#top">Home</a>
+            </li>
+            <li>
+                <a href="#about">About</a>
+            </li>
+            <li>
+                <a href="#fastAnalysis">QuickLook</a>
+            </li>
+            <li>
+                <a href="#gameAnalysis">Graphs</a>
+            </li>
+            <li>
+                <a href="#contact">Contact</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Header -->
+    <header id="top" class="header">
+        <div class="text-vertical-center">
+            <h1>(Beau) -tifying Sports Data</h1>
+            <h3>Using HighCharts, BootStrap &amp; app.sportdata.com.au</h3>
+            <br>
+            <a href="#about" class="btn btn-dark btn-lg">Find Out More</a>
             
-              
+            <a href="#fastAnalysis" class="btn btn-dark btn-lg">Fast Analysis</a>
+            
+            <a href="#schedule" class="btn btn-dark btn-lg">Home Games</a>
+        </div>
+    </header>
 
-              
-              <!--
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Action</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
-                  <li class="divider"></li>
-                  <li class="dropdown-header">Nav header</li>
-                  <li><a href="#">Separated link</a></li>
-                  <li><a href="#">One more separated link</a></li>
-                </ul>
-              </li> -->
-            </ul>
-            <!--<ul class="nav navbar-nav navbar-right">
-              <li class="active"><a href="./">Default</a></li>
-              <li><a href="../navbar-static-top/">Static top</a></li>
-              <li><a href="../navbar-fixed-top/">Fixed top</a></li>
-            </ul>-->
-          </div><!--/.nav-collapse -->
-        </div><!--/.container-fluid -->
-      </div>
+    <!-- About -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2>Creating Graphs Based on a data freely found on schedule websites</h2>
+                    <p class="lead">All Data is Default on Albion Indoor Sports</p>
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container -->
+    </section>
 
+    <!-- Services -->
+    <!-- The circle icons use Font Awesome's stacked icon classes. For more information, visit http://fontawesome.io/examples/ -->
+    <section id="fastAnalysis" class="services bg-primary">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-lg-10 col-lg-offset-1">
+                    <h2>Our Services</h2>
+                    <hr class="small">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6">
+                          
+                            <div class="service-item">
+                                <div class="fa-stack fa-4x">
+                                <canvas id="lastMatch" height="112px" width="112px"></canvas>                                
+                                </div>                             
+                                <h4>
+                                    <strong>Last Match</strong>
+                                </h4>
+                                <p>Goal Score</p>
+                                <a href="#gameAnalysis" class="btn btn-light">See More Graphs</a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="service-item">
+                                <div class="fa-stack fa-4x">
+                                <canvas id="winsvLosses" height="112px" width="112px"></canvas>                                
+                                </div>  
+                                <h4>
+                                    <strong>Wins / Losses</strong>
+                                </h4>
+                                <p>Games Won, Games Lost</p>
+                                <a href="#gameAnalysis" class="btn btn-light">See More Graphs</a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="service-item">
+                                <div class="fa-stack fa-4x">
+                                <canvas id="forAgainst" height="112px" width="112px"></canvas>                                
+                                </div>  
+                                <h4>
+                                    <strong>For &amp; Against</strong>
+                                </h4>
+                                <p>Goals Scored, Goals Missed</p>
+                                <a href="#gameAnalysis" class="btn btn-light">See More Graphs</a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="service-item">
+                               <div class="fa-stack fa-4x">
+                                <canvas id="winsLadder" height="112px" width="112px"></canvas>                                
+                                </div>  
+                                <h4>
+                                    <strong>Wins Ladder</strong>
+                                </h4>
+                                <p>Radar Based on Wins</p>
+                                <a href="#gameAnalysis" class="btn btn-light">See More Graphs</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.row (nested) -->
+                </div>
+                <!-- /.col-lg-10 -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container -->
+    </section>
+
+    <!-- Callout -->
+    <aside class="callout">
+        <div class="text-vertical-center">
+            <h1>Charts</h1>
+        </div>
+    </aside>
+    <!-- Portfolio -->
+    <section id="gameAnalysis" class="portfolio">
+         <div class="col-lg-12 text-vertical-center">
+                     <a href="#active" onClick="plotWinsIncremental()" class="btn btn-lg btn-dark" data-toggle="tab">Score Board</a>
+                      <a href="#WinsLossPw" onClick="plotWinsLosses()" class="btn btn-lg btn-light" data-toggle="tab">Plot Wins/Losses</a>
+                      <a href="#WinsLossMarginPw" onClick="plotWinLossMargins()" class="btn btn-lg btn-light" data-toggle="tab">Plot Wins/Loss Margin</a>
+                      <a href="#goalsInc" onClick="plotGoalsIncrement();" class="btn btn-lg btn-light" data-toggle="tab">Goals Incremental</a>
+                      <a href="#GoalsMarginInc" onClick="plotGoalsMarginsIncremental()" class="btn btn-lg btn-light" data-toggle="tab">Goals Margins Incremental</a>
+                      <a href="#goalsPw" onClick="plotGoalsPerWeek()" class="btn btn-lg btn-light" data-toggle="tab">Goals Per Week</a>
+                      <a href="#matchupHistory" onClick="plotCompareTwoTeams('Jimmie Rustlers','The Kunners')" class="btn btn-lg btn-light" data-toggle="tab">Compare Teams</a>
+                </div>
+        <div class="container">
       <!-- Main component for a primary marketing message or call to action -->
-      <div id="jumbrotron" class="jumbotron" style="height: auto !important;">
-      	<div id="graphs" class="jumbotron" style="min-width: 310px; height: auto; margin: 0 auto"></div>
-      </div>
-</div> <!-- /container -->
- <div class="modal fade bs-example-modal-sm" id= 'mymodal' tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <select name="list-centre" id="list-centre" class="form-control"></select>
-      <select name="list-leagues" id="list-leagues" class="form-control"></select>
-      <select name="list-teams" id="list-teams" class="form-control"></select>
-    </div>
-  </div>
-</div>
+      
+        <div id="graphs" style="min-width: 310px; height: auto; margin: 0 auto"></div>
+     
+            <!-- /.row -->
+        </div>
+        <!-- /.container -->
+    </section>
 
+    <!-- Call to Action -->
+    <aside id="schedule" class="call-to-action bg-primary">
+        <div class="container">
+           <div class="col-lg-12 text-vertical-center">
+                <h1></h1>
+            </div>
+        </div>
+    </aside>
 
+    <!-- Map -->
+    <section id="contact" class="map">
+        <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=Brisbane Albion Indoor Sports&amp;output=embed"></iframe>
+        <br />
+        <small>
+            <a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=Brisbane Albion Indoor Sports"></a>
+        </small>
+        </iframe>
+    </section>
 
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 col-lg-offset-1 text-center">
+                    <h4><strong>Beau Rudder</strong>
+                    </h4>
+                    <p>Vancouver,<br>CANADA V6R 1B2</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fa fa-phone fa-fw"></i>beau.rudder</li>
+                        <li><i class="fa fa-envelope-o fa-fw"></i>  <a href="mailto:beau.j.rudder@gmail.com">beau.j.rudder@gmail.com</a>
+                        </li>
+                    </ul>
+                    <br>
+                    <ul class="list-inline">
+                        <li>
+                            <a href="#"><i class="fa fa-facebook fa-fw fa-3x"></i></a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-twitter fa-fw fa-3x"></i></a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-dribbble fa-fw fa-3x"></i></a>
+                        </li>
+                    </ul>
+                    <hr class="small">
+                    <p class="text-muted">Copyright &copy; Your Website 2014</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-<script>
-  $(function () {
+    <!-- jQuery Version 1.11.0 -->
+    <script src="js/jquery-1.11.0.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/purl.js"></script>
+    <script src="js/Chart.js"></script>
+<script src="js/sportdata.js"></script>
+    <script src="http://code.highcharts.com/stock/highstock.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+    <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script>
+    // Closes the sidebar menu
+    $("#menu-close").click(function(e) {
+        e.preventDefault();
+        $("#sidebar-wrapper").toggleClass("active");
+    });
+
+    // Opens the sidebar menu
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#sidebar-wrapper").toggleClass("active");
+    });
+
+    // Scrolls to the selected menu item on the page
+    $(function() {
+        $('a[href*=#]:not([href=#])').click(function() {
+            if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') || location.hostname == this.hostname) {
+
+                var target = $(this.hash);
+                target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+                if (target.length) {
+                    $('html,body').animate({
+                        scrollTop: target.offset().top
+                    }, 1000);
+                    return false;
+                }
+            }
+        });
 
         $('#graphs').highcharts({
             chart: {
@@ -627,9 +285,7 @@ function plotWinsIncremental(){
             subtitle: {
                 text: 'Source: app.sportdata.com'
             },
-            rangeSelector:{
-                enabled:true
-            },
+            
             xAxis: [{
                 type: 'datetime',
                 dateTimeLabelFormats: { // don't display the dummy year
@@ -643,81 +299,37 @@ function plotWinsIncremental(){
                 }
             }],
             yAxis: [{ // Primary yAxis
-                labels: {
-                    format: '{value}',
-                    style: {
-                        color: Highcharts.getOptions().colors[1]
-                    }
-                },
                 title: {
-                    text: 'Teams',
+                    text: 'Metric',
                     style: {
                         color: Highcharts.getOptions().colors[1]
                     }
                 }
             
             }],
-			tooltip: {
-			    /*formatter: function (a) {
-
-			    		function toolTipFormatter(seriesPos){
-							var b = seriesPos.series,
-						        c = b.tooltipOptions,
-						        d = o(c.valueDecimals, ""),
-						        e = c.valuePrefix || "",
-						        f = c.valueSuffix ||
-						        "";
-						    q(b.pointArrayMap || ["y"], function (b) {
-						        b = "{point." + b;
-						        if (e || f) a = a.replace(b + "}", e + b + "}" + f);
-						        a = a.replace(b + "}", b + ":,." + d + "f}")
-						    });
-						    return Ja(a, {
-						        point: this,
-						        series: this.series
-						    })
-			    		}
-			    	    var b = this.points || ma(this),
-					        c = b[0].series,
-					        d;
-					    d = [a.tooltipHeaderFormatter(b[0])];
-					    q(b, function (a) {
-					        c = a.series;
-					        d.push(c.tooltipFormatter && c.tooltipFormatter(a) || a.point.tooltipFormatter(c.tooltipOptions.pointFormat));
-					    });
-					    d.push(a.options.footerFormat || "");
-					    return d.join("");
-				},*/
-			    shared: true
-			},
+            tooltip: {
+                shared: true
+            },
             legend: {
-                layout: 'vertical',
-                align: 'right',
-                x: -10,
-                verticalAlign: 'top',
-                y: 100,
-                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+                display: true
+
             },
             series: []
         });
 
-    });
-		
+    
+    var id = ($.url().param('id') == undefined) ? 1655 : $.url().param('id');
+    var myTeam = ($.url().param('team') == undefined && id == 1655) ? 'Jimmie Rustlers' : undefined;
+    init(id, myTeam);
+    var teams = [];
+    var score_by_games = [];
+    
 
 
-/*$('#graphs').highcharts().addSeries({
-        name: 'ADBE',
-        data: ADBE
-    }, false);
-    var nav = chart.get('navigator');
-    nav.setData(ADBE);
-    chart.xAxis[0].setExtremes(); */
-    //Sort Teams into Series
-  
+
+});
 </script>
 
-
-
-
 </body>
+
 </html>

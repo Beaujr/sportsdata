@@ -26,6 +26,7 @@ function loadTeams(){
 			}
 			//$team_count = count($ele)-1; //remove 1 for the th row
 	}
+
 	return $teamArray;
 }
 
