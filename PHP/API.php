@@ -21,5 +21,9 @@ if ($_GET["service"] == 'centre' && $_GET['id'] != null) {
     $SportsData->loadDivisionData($_GET['id']);
     $scoreArray = array('Score' => $SportsData->pastScores_By_Game(), 'Teams' => $SportsData->loadTeams());
     echo json_encode($scoreArray);
+} else if ($_GET['service'] == 'site') {
+    $SportsData->loadSiteData();
+
+    echo json_encode($SportsData->loadSite());
 }
 ?>

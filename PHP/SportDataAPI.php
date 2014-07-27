@@ -19,6 +19,8 @@ class SportDataApi
     private $leagueHTML;
     private $team_count;
     private $divisionHTML;
+    private $siteHTML;
+    private $directory;
     private $divisionDir;
     private $centreDir;
     private $teamDir;
@@ -37,6 +39,7 @@ class SportDataApi
 
     function __construct(){
         $directory = '../Data/SportData/' . date('Y') . date('m') . date('d');
+        $this->directory = $directory;
         $this->divisionDir = $directory . '/division';
         $this->centreDir = $directory . '/centre';
         $this->teamDir = $directory . '/team';
@@ -52,7 +55,39 @@ class SportDataApi
         $this->divisionHTML;
 
     }
+    function loadSiteData(){
+        if (file_exists($this->directory . '/all.html')) {
+            $this->siteHTML = file_get_html("http://app.sportdata.com.au/find");
+            $this->writeRawData($this->siteHTML, "all", $this->directory);
+        } else {
+            $this->siteHTML = str_get_html(file_get_contents($this->directory . '/all.html'));
+        }
+        return $this->siteHTML;
+    }
 
+    function loadSite(){
+        $siteName =  'SportData';
+        $responseArray = array();
+        if (!file_exists($this->directory . '/' . $siteName . '.json')) {
+            $hrefArray = $this->siteHTML->find('ul',0)->find('a');
+            $siteArray = array();
+            for ($i = 0; $i < count($hrefArray); $i++) {
+                $this->centreHTML = $this->loadCentreData(str_replace('/find_sports/', '', $hrefArray[$i]->href));
+                $centres = $this->loadLeagues();
+                array_push($siteArray, array('name' => $hrefArray[$i]->plaintext,
+                    'id' => str_replace('/find_sports/', '', $hrefArray[$i]->href), 'leagues' => $centres
+                ));
+                if($i == 3){
+                    break;
+                }
+            }
+            $responseArray = array('name'=>$siteName, 'leagues' => $siteArray);
+            $this->writeRawData(serialize($responseArray), $siteName, $this->centreDir, '.json');
+        } else {
+            $responseArray = unserialize(str_get_html(file_get_contents($this->centreDir . '/' . $siteName . '.json')));
+        }
+        return $responseArray;
+    }
     function loadLeagues()
     {
         $centreName =  $this->centreHTML->find('title',0)->plaintext;
