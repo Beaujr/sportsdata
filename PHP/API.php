@@ -10,7 +10,7 @@ $SportsData = new SportDataApi();
 
 if ($_GET["service"] == 'centre' && $_GET['id'] != null) {
     $SportsData->loadCentreData($_GET['id']);
-    echo json_encode($SportsData->loadLeagues($_GET['id']));
+    echo json_encode($SportsData->loadLeagues());
 } else if ($_GET['service'] == 'league' && $_GET['id'] != null) {
     $SportsData->loadLeagueData($_GET['id']);
     echo json_encode($SportsData->loadDivisions());

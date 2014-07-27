@@ -3,6 +3,7 @@
 var myTeam;
 var id;
 var teamColours= [];
+var donutArray = [];
 function setColours(){
     for(i = 0; i < teams.length; i++){
         teamColours[teams[i]] = Highcharts.getOptions().colors[i];
@@ -16,8 +17,8 @@ function init(id,team){
     score_by_games = data['Score'];
     teams=data['Teams'];
     myTeam = (myTeam == undefined) ? teams[0] : myTeam;
-    $('.services.bg-primary').find('h2').text(myTeam);
-    $('.call-to-action.bg-primary').find('h1').text(myTeam+" play at:");
+    //$('.services.bg-primary').find('h2').text(myTeam);
+    //$('.call-to-action.bg-primary').find('h1').text(myTeam+" play at:");
     setColours();
     plotWinsIncremental();
     generateDonuts();
@@ -141,14 +142,34 @@ function generateDonuts(){
       //String - A legend template
       legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>"
   };
-  lastMatchDonut(options);
-  winsvLossesDonut(options);
-  forAgainstDonut(options);
-  winsLadderPolar(options);
+    if (donutArray.length == 0) {
+        donutArray.push({object : chartFactory("lastMatch", options, "lastMatchDonut", "doughnut"), update: 'lastMatchDonut' });
+        donutArray.push({object : chartFactory("winsvLosses", options, "winsvLossesDonut", "doughnut"), update: 'winsvLossesDonut' });
+        donutArray.push({object : chartFactory("forAgainst", options, "forAgainstDonut", "doughnut"), update: 'forAgainstDonut' });
+        donutArray.push({object : chartFactory("winsLadder", options, "winsLadderPolar", "polar"), update: 'winsLadderPolar' });
+    }else{
+        for(var i = 0; i < donutArray.length; i++){
+            donutArray[i].object.update(window[donutArray[i].update]());
+        }
+    }
+
 }
 
-function lastMatchDonut(options){
-   var ctx = document.getElementById("lastMatch").getContext("2d");
+function chartFactory (div, options, data, type){
+    var ctx = document.getElementById(div).getContext("2d");
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    data = window[data]();
+    if (type == 'doughnut'){
+        return new Chart(ctx).Doughnut(data,options);
+    }
+    if (type == 'polar'){
+        return new Chart(ctx).PolarArea(data,options);
+    }
+    return false;
+}
+
+function lastMatchDonut(){
    var data = [];
    //For all the games played so far
     for(i = score_by_games.length-1; i >=0 ;i--){
@@ -198,12 +219,10 @@ function lastMatchDonut(options){
         }
       }
     }
-  
-  var myDoughnutChart = new Chart(ctx).Doughnut(data,options);
+  return data;
 }
 //forAgainst
-function winsvLossesDonut(options){
-  var ctx = document.getElementById("winsvLosses").getContext("2d");
+function winsvLossesDonut(){
   var wins = 0;
   var losses = 0;
   var draw = 0;
@@ -246,10 +265,9 @@ function winsvLossesDonut(options){
       label: 'Draw'
     }
   ];
-  var myDoughnutChart = new Chart(ctx).Doughnut(data,options);
+  return data;
 }
-function forAgainstDonut(options){
-  var ctx = document.getElementById("forAgainst").getContext("2d");
+function forAgainstDonut(){
   var scored = 0;
   var missed = 0;
   //For all the games played so far
@@ -285,11 +303,11 @@ function forAgainstDonut(options){
       label: 'Scored'
     }
   ];
-  var myDoughnutChart = new Chart(ctx).Doughnut(data,options);
+    return data;
 }
 
-function winsLadderPolar(options){
-  var ctx = document.getElementById("winsLadder").getContext("2d");
+function winsLadderPolar(){
+
   var teamArray = [];
   //For all the games played so far
   for(i = 0; i < score_by_games.length;i++){
@@ -326,7 +344,7 @@ function winsLadderPolar(options){
       label: i
     });
   }
-  var myPolarAreaChart = new Chart(ctx).PolarArea(data,options);
+    return data;
 }
 //Empty the graphs data
 function cleanRemoveAllSeries(){

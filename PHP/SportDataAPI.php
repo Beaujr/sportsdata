@@ -27,16 +27,16 @@ class SportDataApi
     function loadCentreData($id)
     {
         if (!file_exists($this->centreDir . '/' . $id . '.html')) {
-            $centreHTML = file_get_html("http://app.sportdata.com.au/find_sports/" . $id);
-            $this->writeRawData($centreHTML, $id, $this->centreDir);
+            $this->centreHTML = file_get_html("http://app.sportdata.com.au/find_sports/" . $id);
+            $this->writeRawData($this->centreHTML, $id, $this->centreDir);
         } else {
-            $centreHTML = str_get_html(file_get_contents($this->centreDir . '/' . $id . '.html'));
+            $this->centreHTML = str_get_html(file_get_contents($this->centreDir . '/' . $id . '.html'));
         }
-        return $centreHTML;
+        return $this->centreHTML;
     }
 
     function __construct(){
-        $directory = '../Data/' . date('Y') . date('m') . date('d');
+        $directory = '../Data/SportData/' . date('Y') . date('m') . date('d');
         $this->divisionDir = $directory . '/division';
         $this->centreDir = $directory . '/centre';
         $this->teamDir = $directory . '/team';
@@ -46,7 +46,7 @@ class SportDataApi
         $this->makeDir($this->teamDir);
 
         $this->team_count = 0;
-        $this->centreHTML = $this->loadCentreData(29);
+        $this->centreHTML;
         $this->leagueHTML;
         $this->team_count;
         $this->divisionHTML;
@@ -55,29 +55,36 @@ class SportDataApi
 
     function loadLeagues()
     {
+        $centreName =  $this->centreHTML->find('title',0)->plaintext;
         $responseArray = array();
-        $centreArray = array();
-        $hrefArray = $this->centreHTML->find('a');
-        for ($i = 2; $i < count($hrefArray); $i++) {
-            $this->leagueHTML = $this->loadLeagueData(str_replace('/find_leagues/', '', $hrefArray[$i]->href));
-            $divisions = $this->loadDivisions();
-            array_push($centreArray, array('league' => $hrefArray[$i]->plaintext,
-                'id' => str_replace('/find_leagues/', '', $hrefArray[$i]->href), 'divisions' => $divisions
-            ));
+        if (!file_exists($this->centreDir . '/' . $centreName . '.json')) {
+            $hrefArray = $this->centreHTML->find('a');
+            $centreArray = array();
+            for ($i = 2; $i < count($hrefArray); $i++) {
+                $this->leagueHTML = $this->loadLeagueData(str_replace('/find_leagues/', '', $hrefArray[$i]->href));
+                $divisions = $this->loadDivisions();
+                array_push($centreArray, array('league' => $hrefArray[$i]->plaintext,
+                    'id' => str_replace('/find_leagues/', '', $hrefArray[$i]->href), 'divisions' => $divisions
+                ));
+            }
+            $responseArray = array('name'=>$centreName, 'leagues' => $centreArray);
+            $this->writeRawData(serialize($responseArray), $centreName, $this->centreDir, '.json');
+        } else {
+            $responseArray = unserialize(str_get_html(file_get_contents($this->centreDir . '/' . $centreName . '.json')));
         }
-        array_push($responseArray, $centreArray);
         return $responseArray;
+
     }
 
     function loadLeagueData($id)
     {
         if (!file_exists($this->divisionDir . '/' . $id . '.html')) {
-            $leagueHTML = file_get_html("http://app.sportdata.com.au/find_leagues/" . $id);
-            $this->writeRawData($leagueHTML, $id, $this->divisionDir);
+            $this->leagueHTML = file_get_html("http://app.sportdata.com.au/find_leagues/" . $id);
+            $this->writeRawData($this->leagueHTML, $id, $this->divisionDir);
         } else {
-            $leagueHTML = str_get_html(file_get_contents($this->divisionDir . '/' . $id . '.html'));
+            $this->leagueHTML = str_get_html(file_get_contents($this->divisionDir . '/' . $id . '.html'));
         }
-        return $leagueHTML;
+        return $this->leagueHTML;
 
     }
 
@@ -86,11 +93,13 @@ class SportDataApi
 
         $responseArray = array();
         $hrefArray = $this->leagueHTML->find('a');
+
         for ($i = 3; $i < count($hrefArray); $i++) {
             $this->loadDivisionData(str_replace('/results/', '', $hrefArray[$i]->href));
+            $teams = $this->loadTeams();
             array_push($responseArray, array('division' => $hrefArray[$i]->plaintext,
-                'id' => str_replace('/results/', '', $hrefArray[$i]->href)
-            ));
+                'id' => str_replace('/results/', '', $hrefArray[$i]->href), 'teams' => $teams)
+            );
         }
         return $responseArray;
     }
@@ -100,13 +109,9 @@ class SportDataApi
         return is_dir($path) || mkdir($path, 0777, true);
     }
 
-    function writeRawData($content, $name, $path)
+    function writeRawData($content, $name, $path, $fileExtension = '.html')
     {
-        $fp = fopen($path . '/' . $name . '.html', 'w');
-
-        if ($name == 'MasterList') {
-            $content = serialize($content);
-        }
+        $fp = fopen($path . '/' . $name . $fileExtension, 'w');
         //echo 'writing: '.$path.$name;
         fwrite($fp, $content);
         fclose($fp);
