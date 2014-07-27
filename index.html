@@ -75,7 +75,7 @@
         <div class="container">
         <div class="row text-center">
             <div class="row">
-                <select class="btn btn-dark btn-lg" style="width:280px;" ng-model="divisions"
+                <select class="btn btn-dark btn-lg" style="min-width:200px;" ng-model="divisions"
                         ng-options="league.league for league in leagues track by league.id">
                     <option value=''>Select</option>
                 </select>
@@ -83,7 +83,7 @@
             <div class="clearfix visible-xs-block"></div>
 
             <div class="row">
-                <select class="btn btn-dark btn-lg" style="width:280px;" ng-disabled="!divisions" ng-model="teams"
+                <select class="btn btn-dark btn-lg" style="min-width:200px;" ng-disabled="!divisions" ng-model="teams"
                         ng-options="division.division for division in divisions.divisions track by division.id">
                     <option value=''>Select</option>
                 </select>
@@ -91,7 +91,7 @@
             <div class="clearfix visible-xs-block"></div>
 
             <div class="row">
-                <select class="btn btn-dark btn-lg" style="width:280px;" ng-disabled="!teams" ng-model="stats"
+                <select class="btn btn-dark btn-lg" style="min-width:200px;" ng-disabled="!teams" ng-model="stats"
                         ng-options="team for team in teams.teams">
                     <option value=''>Select</option>
                 </select>
@@ -370,7 +370,12 @@
             series: []
         });
 
+       /* if(getCookie('settings') != ""){
+            var cookie = getCookie('settings');
+            init(cookie.split(':')[1],
+             cookie.split(":")[0]);
 
+        }*/
         //var id = ($.url().param('id') == undefined) ? 1655 : $.url().param('id');
         //var myTeam = ($.url().param('team') == undefined && id == 1655) ? 'Jimmie Rustlers' : undefined;
 

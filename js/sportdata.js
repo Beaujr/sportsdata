@@ -11,8 +11,11 @@ function setColours(){
     }
 }
 function init(id,team){
+  //createCookie('settings', myTeam+':'+id, 7);
   myTeam = team;
   id = id;
+
+
   $.getJSON( "PHP/API.php?service=score&id="+id, function( data ) {
     score_by_games = data['Score'];
     teams=data['Teams'];
@@ -715,11 +718,39 @@ function plotWinsIncremental(){
     }
 
     cleanRemoveAllSeries();
+
+
     for(i = 0; i < dataArray.length; i++){
         $('#graphs').highcharts().addSeries(dataArray[i]);
 
     }
     $('#graphs').highcharts().setTitle({text: "LeaderBoard by Week"});
     $('#graphs').highcharts().yAxis[0].setExtremes(0);
-	  $('#graphs').highcharts().redraw();
+	$('#graphs').highcharts().redraw();
+}
+function createCookie(name, value, days) {
+    var expires;
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toGMTString();
+    }
+    else {
+        expires = "";
+    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+function getCookie(c_name) {
+    if (document.cookie.length > 0) {
+        c_start = document.cookie.indexOf(c_name + "=");
+        if (c_start != -1) {
+            c_start = c_start + c_name.length + 1;
+            c_end = document.cookie.indexOf(";", c_start);
+            if (c_end == -1) {
+                c_end = document.cookie.length;
+            }
+            return unescape(document.cookie.substring(c_start, c_end));
+        }
+    }
+    return "";
 }
