@@ -683,10 +683,26 @@ function codeAddress(location) {
     geocoder.geocode( { 'address': address}, function(results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
             map.setCenter(results[0].geometry.location);
+            var formatted_address = results[0].formatted_address.split(",");
+            formatted_address.splice(0,1);
+            formatted_address = formatted_address.join(",");
+            var contentString ='<div id="content">'+
+                '<h3 id="firstHeading" class="firstHeading">'+address+'</h3>'+
+                '<div id="bodyContent">'+
+                '<p>'+formatted_address+'</p>'+
+                '</div>'+
+                '</div>';
+            var infowindow = new google.maps.InfoWindow({
+                content: contentString
+            });
             var marker = new google.maps.Marker({
                 map: map,
                 position: results[0].geometry.location
             });
+            google.maps.event.addListener(marker, 'click', function() {
+                infowindow.open(map,marker);
+            });
+            infowindow.open(map,marker);
         } else {
            //Can't Find address, fuck it lets get drunk
            codeAddress({name: "scratch bar, milton, QLD"});

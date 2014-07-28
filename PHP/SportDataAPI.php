@@ -253,14 +253,16 @@ class SportDataApi
                 );
                 //insert into the array at the location of the games date
                 array_push($gameDates[$round - 1], $stats);
+                $gameDates[$round - 1]['length']++;
 
             }
 
 
         }
+        /*
         for ($i = 0; $i < count($gameDates); $i++) {
             $gameDates[$i]['length'] = count($gameDates[$i]) - 3;
-        }
+        }*/
         $responseArray = $gameDates;
         //array_push($responseArray, $gameDates);
         //array_push($responseArray, $gameDates);
