@@ -14,6 +14,7 @@ function setColours() {
 }
 function init(id) {
     this.id = id;
+
     $.getJSON("PHP/API.php?service=score&id=" + id, function (data) {
         score_by_games = data['Score'];
         teams = data['Teams'];
@@ -671,7 +672,7 @@ function initializeMap() {
     geocoder = new google.maps.Geocoder();
     var latlng = new google.maps.LatLng(-34.397, 150.644);
     var mapOptions = {
-        zoom: 12,
+        zoom: 13,
         center: latlng
     }
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
@@ -687,7 +688,8 @@ function codeAddress(location) {
                 position: results[0].geometry.location
             });
         } else {
-            alert('Geocode was not successful for the following reason: ' + status);
+           //Can't Find address, fuck it lets get drunk
+           codeAddress({name: "scratch bar, milton, QLD"});
         }
     });
 }

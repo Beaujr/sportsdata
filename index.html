@@ -22,6 +22,7 @@
     <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic"
           rel="stylesheet" type="text/css">
     <script src="js/angular.min.js"></script>
+    <script src="https://code.angularjs.org/1.2.12/angular-cookies.min.js"></script>
     <script src="js/controllers.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -87,7 +88,7 @@
                 </select>
             </div>
             <div class="row">
-                <select class="btn btn-dark btn-lg" style="width:235px;"  ng-disabled="!leagues" ng-model="divisions"
+                <select id='division' class="btn btn-dark btn-lg" style="width:235px;"  ng-disabled="!leagues" ng-model="divisions"
                         ng-options="league.league for league in leagues track by league.id">
                     <option value=''>Select</option>
                 </select>
@@ -95,7 +96,7 @@
             <div class="clearfix visible-xs-block"></div>
 
             <div class="row">
-                <select class="btn btn-dark btn-lg" style="width:235px;" ng-disabled="!divisions" ng-model="teams"
+                <select id='team' class="btn btn-dark btn-lg" style="width:235px;" ng-disabled="!divisions" ng-model="teams"
                         ng-options="division.division for division in divisions.divisions track by division.id" ng-change="division()">
                     <option value=''>Select</option>
                 </select>
@@ -104,14 +105,14 @@
 
             <div class="row">
                 <select class="btn btn-dark btn-lg" style="width:235px;" ng-disabled="!teams" ng-model="stats"
-                        ng-options="team for team in teams.teams" ng-click="teamSelect()">
+                        ng-options="team for team in teams.teams">
                     <option value=''>Select</option>
                 </select>
             </div>
 
         <!--</div>-->
         <div class="row">
-            <a href="#fastAnalysis" ng-disabled="!stats" data-toggle="button" class="btn btn-success btn-lg">Set Team!</a>
+            <a href="#fastAnalysis" ng-disabled="!stats" data-toggle="button" ng-click="teamSelect()" class="btn btn-success btn-lg">Set Team!</a>
         </div>
       </div>
 
@@ -396,16 +397,8 @@
 
     });
     initializeMap();
-    if(getCookie('settings') != ""){
-
-        var cookie = getCookie('settings');
-        myTeam = cookie.split(":")[1];
-        init(cookie.split(':')[2]);
-        $('#schedule').find('strong').text(myTeam+" play at:");
-        $('#schedule').find('h2').text(cookie.split(":")[0]);
-        codeAddress({name: cookie.split(":")[0]});
+    if(getCookie('settings') == ""){
         window.location = '#fastAnalysis';
-
     }
 </script>
 
