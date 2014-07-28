@@ -234,7 +234,7 @@ class SportDataApi
             //If the game isnt a bye or in the future
             if (($matchDetails[$table_details['F']])) {
                 //if the round isnt added to the array yet
-                if ($gameDates[$round - 1]['Round'] != $round) {
+                if ($gameDates[$round - 1]['Round'] != $round && $round != "none") {
                     //add length
 
                     //add new data
@@ -252,8 +252,10 @@ class SportDataApi
                     'F' => $scoreF
                 );
                 //insert into the array at the location of the games date
-                array_push($gameDates[$round - 1], $stats);
-                $gameDates[$round - 1]['length']++;
+                if($round != "none"){
+                    array_push($gameDates[$round - 1], $stats);
+                    $gameDates[$round - 1]['length']++;
+                }
 
             }
 
