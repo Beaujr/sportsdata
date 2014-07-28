@@ -395,8 +395,9 @@
 
 
     });
+    initializeMap();
     if(getCookie('settings') != ""){
-        initializeMap();
+
         var cookie = getCookie('settings');
         myTeam = cookie.split(":")[1];
         init(cookie.split(':')[2]);
