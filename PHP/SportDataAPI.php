@@ -56,7 +56,7 @@ class SportDataApi
 
     }
     function loadSiteData(){
-        if (file_exists($this->directory . '/all.html')) {
+        if (!file_exists($this->directory . '/all.html')) {
             $this->siteHTML = file_get_html("http://app.sportdata.com.au/find");
             $this->writeRawData($this->siteHTML, "all", $this->directory);
         } else {
@@ -72,14 +72,12 @@ class SportDataApi
             $hrefArray = $this->siteHTML->find('ul',0)->find('a');
             $siteArray = array();
             for ($i = 0; $i < count($hrefArray); $i++) {
-                $this->centreHTML = $this->loadCentreData(str_replace('/find_sports/', '', $hrefArray[$i]->href));
-                $centres = $this->loadLeagues();
+                //$this->centreHTML = $this->loadCentreData(str_replace('/find_sports/', '', $hrefArray[$i]->href));
+                //$centres = $this->loadLeagues();
                 array_push($siteArray, array('name' => $hrefArray[$i]->plaintext,
-                    'id' => str_replace('/find_sports/', '', $hrefArray[$i]->href), 'leagues' => $centres
+                    'id' => str_replace('/find_sports/', '', $hrefArray[$i]->href)
                 ));
-                if($i == 3){
-                    break;
-                }
+
             }
             $responseArray = array('name'=>$siteName, 'leagues' => $siteArray);
             $this->writeRawData(serialize($responseArray), $siteName, $this->centreDir, '.json');

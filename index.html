@@ -23,13 +23,19 @@
           rel="stylesheet" type="text/css">
     <script src="js/angular.min.js"></script>
     <script src="js/controllers.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-
+    <style>
+        .dropdown-menu {
+            min-width:auto;
+            width:100%;
+        }
+    </style>
 </head>
 
 <body ng-controller="TeamListCtrl">
@@ -73,9 +79,15 @@
 
         <!--<a href="#schedule" class="btn btn-dark btn-lg">Home Games</a>-->
         <div class="container">
-        <div class="row text-center">
+        <!--<div class="row text-center">-->
             <div class="row">
-                <select class="btn btn-dark btn-lg" style="min-width:200px;" ng-model="divisions"
+                <select class="btn btn-dark btn-lg" style="width:235px;" ng-model="site"
+                        ng-options="site.name for site in sites track by site.id" ng-change="centre()">
+                    <option value=''>Select</option>
+                </select>
+            </div>
+            <div class="row">
+                <select class="btn btn-dark btn-lg" style="width:235px;"  ng-disabled="!leagues" ng-model="divisions"
                         ng-options="league.league for league in leagues track by league.id">
                     <option value=''>Select</option>
                 </select>
@@ -83,25 +95,25 @@
             <div class="clearfix visible-xs-block"></div>
 
             <div class="row">
-                <select class="btn btn-dark btn-lg" style="min-width:200px;" ng-disabled="!divisions" ng-model="teams"
-                        ng-options="division.division for division in divisions.divisions track by division.id">
+                <select class="btn btn-dark btn-lg" style="width:235px;" ng-disabled="!divisions" ng-model="teams"
+                        ng-options="division.division for division in divisions.divisions track by division.id" ng-change="division()">
                     <option value=''>Select</option>
                 </select>
             </div>
             <div class="clearfix visible-xs-block"></div>
 
             <div class="row">
-                <select class="btn btn-dark btn-lg" style="min-width:200px;" ng-disabled="!teams" ng-model="stats"
+                <select class="btn btn-dark btn-lg" style="width:235px;" ng-disabled="!teams" ng-model="stats"
                         ng-options="team for team in teams.teams">
                     <option value=''>Select</option>
                 </select>
             </div>
 
-        </div>
+        <!--</div>-->
         <div class="row">
             <a href="#fastAnalysis" ng-disabled="!stats" ng-click="teamSelect()" data-toggle="button" class="btn btn-success btn-lg">Set Team!</a>
         </div>
-            </div>
+      </div>
 
 
     </div>
@@ -135,7 +147,7 @@
 
                         <div class="service-item">
                             <div class="fa-stack fa-4x">
-                                <canvas id="lastMatch" height="112px" width="112px"></canvas>
+                                <canvas id="lastMatch" height="112px !important" width="112px !important"></canvas>
                             </div>
                             <h4>
                                 <strong>Last Match</strong>
@@ -203,19 +215,27 @@
 <!-- Portfolio -->
 <section id="gameAnalysis" class="portfolio">
     <div class="col-lg-12 text-vertical-center">
-        <a href="#active" onClick="plotWinsIncremental()" class="btn btn-lg btn-dark" data-toggle="tab">Score Board</a>
-        <a href="#WinsLossPw" onClick="plotWinsLosses()" class="btn btn-lg btn-light" data-toggle="tab">Plot
-            Wins/Losses</a>
-        <a href="#WinsLossMarginPw" onClick="plotWinLossMargins()" class="btn btn-lg btn-light" data-toggle="tab">Plot
-            Wins/Loss Margin</a>
-        <a href="#goalsInc" onClick="plotGoalsIncrement();" class="btn btn-lg btn-light" data-toggle="tab">Goals
-            Incremental</a>
-        <a href="#GoalsMarginInc" onClick="plotGoalsMarginsIncremental()" class="btn btn-lg btn-light"
-           data-toggle="tab">Goals Margins Incremental</a>
-        <a href="#goalsPw" onClick="plotGoalsPerWeek()" class="btn btn-lg btn-light" data-toggle="tab">Goals Per
-            Week</a>
-        <a href="#matchupHistory" onClick="plotCompareTwoTeams('Jimmie Rustlers','The Kunners')"
-           class="btn btn-lg btn-light" data-toggle="tab">Compare Teams</a>
+        <div class="btn-group btn-group-justified">
+            <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">Select Graph From List
+                <span class="caret"></span></a>
+            <ul class="dropdown-menu"  role="menu" id='grouping' >
+                <li><a href="#active" tabindex="-1" onClick="plotWinsIncremental()" class="btn btn-lg btn-light">Score Board</a></li>
+                <li><a href="#WinsLossPw" tabindex="-1" onClick="plotWinsLosses()" class="btn btn-lg btn-light">Plot
+                    Wins/Losses</a></li>
+                <li><a href="#WinsLossMarginPw" tabindex="-1" onClick="plotWinLossMargins()" class="btn btn-lg btn-light">Plot
+                    Wins/Loss Margin</a></li>
+                <li><a href="#goalsInc" tabindex="-1" onClick="plotGoalsIncrement();" class="btn btn-lg btn-light">Goals
+                    Incremental</a></li>
+                <li><a href="#GoalsMarginInc" tabindex="-1" onClick="plotGoalsMarginsIncremental()" class="btn btn-lg btn-light"
+                       >Goals Margins Incremental</a></li>
+                <li><a href="#goalsPw" tabindex="-1" onClick="plotGoalsPerWeek()" class="btn btn-lg btn-light">Goals Per
+                    Week</a></li>
+                <li><a href="#matchupHistory" tabindex="-1" onClick="plotCompareTwoTeams(teams[0],teams[1])"
+                       class="btn btn-lg btn-light">Compare Teams</a></li>
+            </ul>
+        </div>
+
+
     </div>
     <div class="container">
         <!-- Main component for a primary marketing message or call to action -->
@@ -231,20 +251,18 @@
 <aside id="schedule" class="call-to-action bg-primary">
     <div class="container">
         <div class="col-lg-12 text-vertical-center">
-            <h1>{{ myTeam.name }} play at: </h1>
+            <h1><strong>{{ myTeam.name }} play at: </strong> </h1>
+            <h2>{{home.name}}</h2>
         </div>
     </div>
 </aside>
 
 <!-- Map -->
 <section id="contact" class="map">
-    <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
-            src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=Brisbane Albion Indoor Sports Complex&amp;output=embed"></iframe>
-    <br/>
-    <small>
-        <a ng-href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q={{home.name}}"></a>
-    </small>
-    </iframe>
+    <div id="map-canvas" style="height: 100%;
+        margin: 0px;
+        padding: 0px">
+    </div>
 </section>
 
 <!-- Footer -->
@@ -288,9 +306,9 @@
 <script src="js/purl.js"></script>
 <script src="js/Chart.js"></script>
 <script src="js/sportdata.js"></script>
-<script src="http://code.highcharts.com/stock/highstock.js"></script>
-<script src="http://code.highcharts.com/modules/exporting.js"></script>
-<script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+<script src="js/highstock.js"></script>
+<script src="js/exporting.js"></script>
+
 
 
 <!-- Custom Theme JavaScript -->
@@ -369,13 +387,6 @@
             },
             series: []
         });
-
-       /* if(getCookie('settings') != ""){
-            var cookie = getCookie('settings');
-            init(cookie.split(':')[1],
-             cookie.split(":")[0]);
-
-        }*/
         //var id = ($.url().param('id') == undefined) ? 1655 : $.url().param('id');
         //var myTeam = ($.url().param('team') == undefined && id == 1655) ? 'Jimmie Rustlers' : undefined;
 
@@ -384,6 +395,16 @@
 
 
     });
+    if(getCookie('settings') != ""){
+        initializeMap();
+        var cookie = getCookie('settings');
+        myTeam = cookie.split(":")[1];
+        init(cookie.split(':')[2]);
+        $('#schedule').find('strong').text(myTeam+" play at:");
+        $('#schedule').find('h2').text(cookie.split(":")[0]);
+        codeAddress({name: cookie.split(":")[0]});
+
+    }
 </script>
 
 </body>
