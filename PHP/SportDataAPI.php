@@ -232,7 +232,7 @@ class SportDataApi
 
 
             //If the game isnt a bye or in the future
-            if ($scoreF == "" && $round != "none") {
+            if ($matchDetails[$table_details['F']]) {
                 //if the round isnt added to the array yet
                 if ($gameDates[$round - 1]['Round'] != $round && $round != "none") {
                     //add length
