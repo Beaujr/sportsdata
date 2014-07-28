@@ -104,14 +104,14 @@
 
             <div class="row">
                 <select class="btn btn-dark btn-lg" style="width:235px;" ng-disabled="!teams" ng-model="stats"
-                        ng-options="team for team in teams.teams">
+                        ng-options="team for team in teams.teams" ng-click="teamSelect()">
                     <option value=''>Select</option>
                 </select>
             </div>
 
         <!--</div>-->
         <div class="row">
-            <a href="#fastAnalysis" ng-disabled="!stats" ng-click="teamSelect()" data-toggle="button" class="btn btn-success btn-lg">Set Team!</a>
+            <a href="#fastAnalysis" ng-disabled="!stats" data-toggle="button" class="btn btn-success btn-lg">Set Team!</a>
         </div>
       </div>
 
@@ -404,6 +404,7 @@
         $('#schedule').find('strong').text(myTeam+" play at:");
         $('#schedule').find('h2').text(cookie.split(":")[0]);
         codeAddress({name: cookie.split(":")[0]});
+        window.location = '#fastAnalysis';
 
     }
 </script>
