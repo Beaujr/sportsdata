@@ -229,7 +229,10 @@ class SportDataApi
             $scoreB = $matchDetails[$table_details['B']]->plaintext;
             $scoreF = $matchDetails[$table_details['F']]->plaintext;
             //If the Date isnt in the gameDates array
-
+            if ($scoreF == "A" || $scoreF == "B"){
+                $scoreA = ($scoreF == "A") ? 0 : 1;
+                $scoreB = ($scoreF == "B") ? 0 : 1;
+            }
 
             //If the game isnt a bye or in the future
             if ($matchDetails[$table_details['F']]) {
@@ -239,6 +242,8 @@ class SportDataApi
 
                     //add new data
                     array_push($gameDates, array('Round' => $round, 'Date' => $gameDate, 'length' => 0));
+                } else if ($round == "none"){
+                    array_push($gameDates, array('Round' => count($gameDates), 'Date' => $gameDate, 'length' => 0));
                 }
 
                 //add the stats to an array for the game
@@ -252,10 +257,14 @@ class SportDataApi
                     'F' => $scoreF
                 );
                 //insert into the array at the location of the games date
-               // if($round != "none"){
+                if($round != "none"){
                     array_push($gameDates[$round - 1], $stats);
                     $gameDates[$round - 1]['length']++;
-              //  }
+                } else {
+
+                    array_push($gameDates[ count($gameDates)-1], $stats);
+                    $gameDates[ count($gameDates) -1]['length']++;
+                }
 
             }
 

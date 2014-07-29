@@ -104,6 +104,19 @@ function lastMatchDonut() {
             var teamA = score_by_games[i][x]["Team A"];
             //TEAM B
             var teamB = score_by_games[i][x]["Team B"];
+            if (parseInt(score_by_games[i][x]["B"]) == 0 && parseInt(score_by_games[i][x]["A"]) ==0){
+                data = [
+                    {
+                        value: 0.5,
+                        color: "#00B2EE",
+                        highlight: "#B2DFEE",
+                        label: 'Draw @ Nil'
+                    }];
+                var opponent = (myTeam == teamA) ? teamB :  teamA;
+                $('#lastMatch').parent().parent().find('p').text('Against: ' + opponent);
+                break;
+            }
+
             if (teamA == myTeam) {
                 data = [
                     {
@@ -154,6 +167,7 @@ function winsvLossesDonut() {
 
             var teamA = score_by_games[i][x]["Team A"];
             var teamB = score_by_games[i][x]["Team B"];
+
             if (teamA == myTeam || teamB == myTeam) {
                 if (parseInt(score_by_games[i][x]["A"]) > parseInt(score_by_games[i][x]["B"])) {
                     wins = (teamA == myTeam) ? wins + 1 : wins;
@@ -165,6 +179,7 @@ function winsvLossesDonut() {
                     draw++;
                 }
             }
+
         }
     }
     var data = [
@@ -198,7 +213,9 @@ function forAgainstDonut() {
 
             var teamA = score_by_games[i][x]["Team A"];
             var teamB = score_by_games[i][x]["Team B"];
-            if (teamA == myTeam) {
+            if (score_by_games[i][x]["F"] != ""){
+
+            } else if (teamA == myTeam) {
                 scored += parseInt(score_by_games[i][x]["A"]);
                 missed += parseInt(score_by_games[i][x]["B"])
             } else if (teamB == myTeam) {
@@ -242,7 +259,11 @@ function winsLadderPolar() {
             if (teamArray[teamB] == undefined) {
                 teamArray[teamB] = 0;
             }
-            if (parseInt(score_by_games[i][x]["A"]) > parseInt(score_by_games[i][x]["B"])) {
+            if (score_by_games[i][x]["F"] != ""){
+                var forfeit = score_by_games[i][x]["F"];
+                var forfeitTeam = score_by_games[i][x]["Team "+forfeit];
+                var yourScore = (teamA == forfeitTeam) ? teamArray[teamB]++: teamArray[teamA]++;
+            } else if (parseInt(score_by_games[i][x]["A"]) > parseInt(score_by_games[i][x]["B"])) {
                 teamArray[teamA]++;
             } else if (parseInt(score_by_games[i][x]["A"]) < parseInt(score_by_games[i][x]["B"])) {
                 teamArray[teamB]++;
@@ -687,7 +708,7 @@ function codeAddress(location) {
             formatted_address.splice(0,1);
             formatted_address = formatted_address.join(",");
             var contentString ='<div id="content">'+
-                '<h3 id="firstHeading" class="firstHeading">'+address+'</h3>'+
+                '<h4 id="firstHeading" class="firstHeading">'+address+'</h4>'+
                 '<div id="bodyContent">'+
                 '<p>'+formatted_address+'</p>'+
                 '</div>'+
