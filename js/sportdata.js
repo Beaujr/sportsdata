@@ -696,6 +696,7 @@ function initializeMap() {
         zoom: 13,
         center: latlng,
         scaleControl: false,
+        draggable: false,
         scrollwheel: false
     }
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
