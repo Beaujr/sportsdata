@@ -24,6 +24,7 @@ class SportDataApi
     private $divisionDir;
     private $centreDir;
     private $teamDir;
+    private $mongoClient;
 
 
     function loadCentreData($id)
