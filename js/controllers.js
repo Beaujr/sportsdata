@@ -12,7 +12,7 @@ teamSelectorApp.controller('TeamListCtrl',['$scope', '$http', '$cookieStore', fu
         myTeam = $scope.myTeam.name;
         codeAddress($scope.home);
     }
-    $http.get('PHP/API.php?service=site').success(function(data) {
+    $http.get('PHP/API.php?service=site&id=SportData').success(function(data) {
         $scope.sites = data['leagues'];
 
     });

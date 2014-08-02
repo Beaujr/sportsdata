@@ -24,7 +24,6 @@ class SportDataApi
     private $divisionDir;
     private $centreDir;
     private $teamDir;
-    private $mongoClient;
 
 
     function loadCentreData($id)
@@ -276,6 +275,8 @@ class SportDataApi
             $gameDates[$i]['length'] = count($gameDates[$i]) - 3;
         }*/
         $responseArray = $gameDates;
+
+      //  $collection->insert(json_encode($responseArray));
         //array_push($responseArray, $gameDates);
         //array_push($responseArray, $gameDates);
         return $responseArray;
