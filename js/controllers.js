@@ -1,6 +1,7 @@
 'use strict';
 
-/* Controllers */var teamSelectorApp = angular.module('teamSelectorApp', ['ngCookies']);
+/* Controllers */
+var teamSelectorApp = angular.module('teamSelectorApp', ['ngCookies']);
 
 teamSelectorApp.controller('TeamListCtrl',['$scope', '$http', '$cookieStore', function ($scope, $http, $cookieStore) {
     //var favoriteCookie = $cookies.settings;

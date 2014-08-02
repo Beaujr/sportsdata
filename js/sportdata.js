@@ -285,7 +285,7 @@ function winsLadderPolar() {
     }
     return data;
 }
-//Empty the graphs data
+//Empty the graphs
 function cleanRemoveAllSeries() {
     while ($('#graphs').highcharts().series.length > 0)
         $('#graphs').highcharts().series[0].remove(true);

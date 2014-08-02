@@ -270,15 +270,9 @@ class SportDataApi
 
 
         }
-        /*
-        for ($i = 0; $i < count($gameDates); $i++) {
-            $gameDates[$i]['length'] = count($gameDates[$i]) - 3;
-        }*/
         $responseArray = $gameDates;
 
-      //  $collection->insert(json_encode($responseArray));
-        //array_push($responseArray, $gameDates);
-        //array_push($responseArray, $gameDates);
+
         return $responseArray;
 
     }
