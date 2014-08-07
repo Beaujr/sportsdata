@@ -73,7 +73,7 @@
         global $mongoClient;
         global $db;
         $collection = $mongoClient->selectCollection($db, $collectionName);
-        $value['createdAt'] = new Date();
+        $value['createdAt'] = new MongoDate();
         $collection->insert($value);
     }
     echo json_encode($resultArray);
