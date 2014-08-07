@@ -8,8 +8,8 @@ teamSelectorApp.controller('TeamListCtrl',['$scope', '$http', '$cookieStore', fu
     $scope.myTeam = { name: $cookieStore.get("myTeam") };
     $scope.my = {name: 'Beau Rudder'};
     $scope.home = {name: $cookieStore.get("location")};
+    $scope.radioModel = 'SportData';
 
-    $scope.radioModel = null;
     $scope.$watch('radioModel', function(newValue, oldValue) {
 
         $http.get('PHP/API.php?service=site&id='+newValue+'&source='+newValue).success(function(data) {
@@ -23,7 +23,7 @@ teamSelectorApp.controller('TeamListCtrl',['$scope', '$http', '$cookieStore', fu
 
         });
     });
-    $scope.radioModel = 'SportData';
+
     $scope.site = $scope.radioModel;
     if ($scope.myTeam && $scope.home && $cookieStore.get("division")){
         init($cookieStore.get("division"), $cookieStore.get("source"));
