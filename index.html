@@ -93,7 +93,7 @@
                 </div>
             <div class="row top-buffer ">
                 <select class="btn btn-dark btn-lg" style="width:235px;" ng-model="site"
-                        ng-options="site.name for site in sites track by site.id" >
+                        ng-options="site.name for site in sites track by site.id" ng-change="centre()">
                     <option value=''>Select</option>
                 </select>
             </div>
