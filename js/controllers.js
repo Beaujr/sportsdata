@@ -11,7 +11,11 @@ teamSelectorApp.controller('TeamListCtrl',['$scope', '$http', '$cookieStore', fu
 
     $scope.radioModel = null;
     $scope.$watch('radioModel', function(newValue, oldValue) {
+
         $http.get('PHP/API.php?service=site&id='+newValue+'&source='+newValue).success(function(data) {
+            if (data['leagues'].length ==1 ) {
+                $scope.site = data['leagues'][0];
+            }
             $scope.sites = data['leagues'];
             $scope.leagues = undefined;
             $scope.divisions = undefined;
@@ -26,8 +30,7 @@ teamSelectorApp.controller('TeamListCtrl',['$scope', '$http', '$cookieStore', fu
         myTeam = $scope.myTeam.name;
         codeAddress($scope.home);
     }
-
-    $scope.centre = function(){
+    $scope.$watch('site', function(){
         $scope.leagues = undefined;
         $scope.divisions = undefined;
         $scope.teams = undefined;
@@ -37,7 +40,8 @@ teamSelectorApp.controller('TeamListCtrl',['$scope', '$http', '$cookieStore', fu
             $scope.leagues = data['leagues'];
 
         });
-    };
+    });
+
 
     $scope.teamSelect = function() {
         $scope.myTeam = { name : $scope.stats};
