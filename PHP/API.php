@@ -48,7 +48,7 @@
         $resultArray = findData($service, 'id', $id);
         if ($resultArray == null) {
             $Source->loadDivisionData($id);
-            $resultArray = array('id='=>$id, 'Score' => $Source->pastScores_By_Game(), 'Teams' => $Source->loadTeams());
+            $resultArray = array('id'=>$id, 'Score' => $Source->pastScores_By_Game(), 'Teams' => $Source->loadTeams());
             insertData($service, $resultArray);
         }
     } else if ($service == 'site') {
@@ -73,7 +73,7 @@
         global $mongoClient;
         global $db;
         $collection = $mongoClient->selectCollection($db, $collectionName);
-        //$value['id'] = $_GET['id'];
+        $value['createdAt'] = new Date();
         $collection->insert($value);
     }
     echo json_encode($resultArray);
