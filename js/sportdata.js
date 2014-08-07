@@ -12,10 +12,10 @@ function setColours() {
 
     }
 }
-function init(id) {
+function init(id, source) {
     this.id = id;
-
-    $.getJSON("PHP/API.php?service=score&id=" + id, function (data) {
+    source = (source == null) ? $('div[class=btn-group]').find('label[class*=active]').text() : source;
+    $.getJSON("PHP/API.php?service=score&id=" + id+"&source="+source, function (data) {
         score_by_games = data['Score'];
         teams = data['Teams'];
         if(myTeam != undefined){
@@ -710,6 +710,9 @@ function codeAddress(location) {
             var formatted_address = results[0].formatted_address.split(",");
             formatted_address.splice(0,1);
             formatted_address = formatted_address.join(",");
+            if(address == "scratch bar, milton, QLD"){
+                formatted_address = "Address Not Found, get maggot instead";
+            }
             var contentString ='<div id="content">'+
                 '<h4 id="firstHeading" class="firstHeading">'+address+'</h4>'+
                 '<div id="bodyContent">'+

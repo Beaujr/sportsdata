@@ -1,5 +1,5 @@
 <?php
-include("ganon.php");
+
 //TESTING CODE
 /*
 loadCentreData(29);
@@ -120,6 +120,8 @@ class SportDataApi
         return $this->leagueHTML;
 
     }
+
+
 
     function loadDivisions()
     {

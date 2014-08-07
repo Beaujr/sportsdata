@@ -7,56 +7,65 @@
  */
 
     include("config.php");
+    include("ganon.php");
     include("SportDataAPI.php");
-    $SportsData = new SportDataApi();
+    include("LeagueAthleticsAPI.php");
+    if ($_GET['source'] == 'SportData'){
+        $Source = new SportDataApi();
+    } else {
+        $Source = new LeagueAthleticsAPI();
+    }
+
     $mongoClient = new MongoClient("mongodb://".$dbUsername.":".$dbPassword."@ds053429.mongolab.com:53429/sportdata");
     $db = 'sportdata';
     $id = $_GET['id'];
     $service = $_GET["service"];
     $resultArray = false;
     if ($service == 'centre' && $id != null) {
-        $resultArray = findData($service);
+        $resultArray = findData($service, 'id', $id);
         if ($resultArray == null) {
-            $SportsData->loadCentreData($id);
-            $resultArray = $SportsData->loadLeagues();
+            $Source->loadCentreData($id);
+            $resultArray = $Source->loadLeagues();
+            $resultArray['id'] = $id;
             insertData($service, $resultArray);
         }
 
     } else if ($service == 'league' && $id != null) {
-        $resultArray = findData($service);
+        $resultArray = findData($service, 'id', $id);
         if ($resultArray == null) {
-            $SportsData->loadLeagueData($id);
-            $resultArray = ($SportsData->loadDivisions());
+            $Source->loadLeagueData($id);
+            $resultArray = ($Source->loadDivisions());
             insertData($service, $resultArray);
         }
     } else if ($service == 'division' && $id != null) {
-        $resultArray = findData($service);
+        $resultArray = findData($service, 'id', $id);
         if ($resultArray == null) {
-            $SportsData->loadDivisionData($id);
-            $resultArray = ($SportsData->loadTeams());
+            $Source->loadDivisionData($id);
+            $resultArray = ($Source->loadTeams());
             insertData($service, $resultArray);
         }
     } else if ($service == 'score' && $id != null) {
-        $resultArray = $resultArray = findData($service);
+        $resultArray = findData($service, 'id', $id);
         if ($resultArray == null) {
-            $SportsData->loadDivisionData($id);
-            $resultArray = array('Score' => $SportsData->pastScores_By_Game(), 'Teams' => $SportsData->loadTeams());
+            $Source->loadDivisionData($id);
+            $resultArray = array('id='=>$id, 'Score' => $Source->pastScores_By_Game(), 'Teams' => $Source->loadTeams());
             insertData($service, $resultArray);
         }
     } else if ($service == 'site') {
-        $resultArray = findData($service);
+        $resultArray = findData($service, 'name', $id);
         if ($resultArray == null) {
-            $SportsData->loadSiteData();
-            $resultArray = ($SportsData->loadSite());
+            $Source->loadSiteData();
+            $resultArray = ($Source->loadSite());
             insertData($service, $resultArray);
         }
     }
 
-    function findData($collectionName){
+    function findData($collectionName, $fieldname, $key){
         global $mongoClient;
         global $db;
+
         $collection = $mongoClient->selectCollection($db, $collectionName);
-        $resultArray = $collection->findOne(array('id' => (string)$_GET['id']));
+        $resultArray = $collection->findOne(array($fieldname => (string) $key));
         return $resultArray;
     }
 
@@ -64,7 +73,7 @@
         global $mongoClient;
         global $db;
         $collection = $mongoClient->selectCollection($db, $collectionName);
-        $value['id'] = $_GET['id'];
+        //$value['id'] = $_GET['id'];
         $collection->insert($value);
     }
     echo json_encode($resultArray);
